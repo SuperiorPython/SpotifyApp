@@ -142,7 +142,7 @@ with c2:
     market = st.selectbox("Market", ["US","GB","DE","FR","CA","AU","BR","JP"], index=0)
 
 with st.expander("Need a known-good test link?"):
-    st.code("https://open.spotify.com/playlist/6sLKqrUF3TEfcMkcS6P3gu?si=m03wRs5MT_S8gmmy4gTZOA # 2010s Throwbacks")
+    st.code("https://open.spotify.com/playlist/6sLKqrUF3TEfcMkcS6P3gu?si=m03wRs5MT_S8gmmy4gTZOA")
 
 # ----------------- Main -----------------
 if st.button("Analyze Playlist", type="primary"):
