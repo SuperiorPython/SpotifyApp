@@ -142,7 +142,7 @@ with c2:
     market = st.selectbox("Market", ["US","GB","DE","FR","CA","AU","BR","JP"], index=0)
 
 with st.expander("Need a known-good test link?"):
-    st.code("https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M  # Today's Top Hits")
+    st.code("https://open.spotify.com/playlist/6sLKqrUF3TEfcMkcS6P3gu?si=m03wRs5MT_S8gmmy4gTZOA # 2010s Throwbacks")
 
 # ----------------- Main -----------------
 if st.button("Analyze Playlist", type="primary"):
@@ -346,18 +346,46 @@ if st.button("Analyze Playlist", type="primary"):
             else:
                 st.info("No release years available for scatter plot.")
 
-        # ---- Covers tab ----
+        # ---- Covers tab (clean grid, stable order) ----
         with tab_cov:
-            thumbs = tracks_df.dropna(subset=["image"])
+            thumbs = tracks_df.dropna(subset=["image"]).copy()
+
             if not thumbs.empty:
+                st.caption("Album covers from your playlist (randomized but neatly aligned)")
+
+                # randomize once per rerun, but reset index for consistent layout
                 seed = int(time.time())
-                thumbs = thumbs.sample(n=min(24, len(thumbs)), random_state=seed)
-                cols = st.columns(6)
-                for i, row in thumbs.iterrows():
-                    with cols[i % 6]:
-                        st.image(row["image"], use_container_width=True)
+                thumbs = thumbs.sample(frac=1, random_state=seed).reset_index(drop=True)
+
+                # limit to 24 or full multiple of 6 for even rows
+                n_display = min(len(thumbs), 24)
+                thumbs = thumbs.iloc[:n_display]
+
+                # render in neat 6×4 grid with equal spacing
+                n_cols = 6
+                cols = st.columns(n_cols)
+                for idx, row in thumbs.iterrows():
+                    with cols[idx % n_cols]:
+                        st.image(
+                            row["image"],
+                            use_container_width=True,
+                            caption=None,
+                            output_format="JPEG"
+                        )
+
+                # optional: page through covers if playlist is huge
+                if len(tracks_df) > 24:
+                    total_pages = (len(tracks_df) + 23) // 24
+                    page = st.slider("Page", 1, total_pages, 1)
+                    start = (page - 1) * 24
+                    end = start + 24
+                    grid = tracks_df.iloc[start:end].dropna(subset=["image"]).reset_index(drop=True)
+                    cols = st.columns(n_cols)
+                    for i, row in grid.iterrows():
+                        with cols[i % n_cols]:
+                            st.image(row["image"], use_container_width=True)
             else:
-                st.info("No cover art found.")
+                st.info("No cover art found for this playlist.")
 
         # ---- Export tab ----
         with tab_export:
