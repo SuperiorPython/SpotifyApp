@@ -32,4 +32,4 @@ Language: Python 3.10+
 
 Hosting: Streamlit Cloud
 
-Public Link: https://spotifyrvisuals.streamlit.app/
+Public Link: https://spotifyvisuals.streamlit.app/
