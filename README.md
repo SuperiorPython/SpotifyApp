@@ -1,11 +1,11 @@
-### 🟢 Playlist Visual Footprint
+## 🟢 Playlist Visual Footprint
 
 Discover what your playlists say about your music taste — visually.
 
 Playlist Visual Footprint is a Streamlit-based web app that turns any public Spotify playlist into an interactive, data-driven dashboard.
 No login required — just paste a playlist link and explore.
 
-### 🎧 Features
+## 🎧 Features
 
 🎵 Genre Footprint → Big green donut chart summarizing your top genres
 
@@ -21,8 +21,8 @@ No login required — just paste a playlist link and explore.
 
 📊 Data Export → Download full track + artist details as CSV files
 
-### 🧩 Tech Stack
-## Layer	Tools & Frameworks
+## 🧩 Tech Stack
+### Layer	Tools & Frameworks
 Frontend	Streamlit
  + Altair
  for interactive charts
@@ -39,7 +39,7 @@ Hosting	Streamlit Cloud
 Paste any public Spotify playlist URL and watch it come to life.
 No account connection, no authentication, completely free to use.
 
-### 🧠 How It Works
+## 🧠 How It Works
 
 Paste a Spotify playlist link (public only).
 
@@ -51,7 +51,7 @@ Optionally, the AI Companion (powered by OpenAI GPT models) generates a personal
 
 Download results as CSVs or just enjoy the dashboard view.
 
-### 📈 Example Output
+## 📈 Example Output
 Demo Playlist	Example Vibe Summary
 Today's Top Hits
 	“This playlist radiates bright, upbeat pop energy with glossy production, rhythmic hooks, and confident vocals. Perfect for busy mornings, gym sessions, or long drives under the sun.”
