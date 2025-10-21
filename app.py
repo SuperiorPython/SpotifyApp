@@ -10,7 +10,7 @@ from spotipy.exceptions import SpotifyException
 # ----------------- App setup -----------------
 st.set_page_config(page_title="Playlist DNA", page_icon="🟢", layout="wide")
 st.title("🟢 Playlist DNA")
-st.caption("Analyze any **public** Spotify playlist. Green visuals • Stable tabs • Optional AI vibe summary.")
+st.caption("Analyze a **public** Spotify playlist. Green visuals • Stable tabs • Optional AI vibe summary. Note: Personalized playlists like 'Discover Weekly' are not consider public by Spotify API")
 
 with st.sidebar:
     if st.button("🔄 Clear cache & rerun"):
