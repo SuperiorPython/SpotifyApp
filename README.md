@@ -23,18 +23,18 @@ No login required — just paste a playlist link and explore.
 
 ## 🧩 Tech Stack
 ### Layer	Tools & Frameworks
-Frontend	Streamlit
- + Altair
- for interactive charts
-Backend	Spotipy
- using the Spotify Web API (Client Credentials Flow)
-AI Integration	OpenAI API
- for optional vibe descriptions
-Language	Python 3.10+
-Hosting	Streamlit Cloud
-🌍 Try It Live
-
-### Public Link: https://spotifyvisuals.streamlit.app
+Frontend:
++ Streamlit
++ Altair  (interactive charts)
+Backend:
++ Spotipy (using the Spotify Web API (Client Credentials Flow))
++ OpenAI API (optional vibe descriptions)
+Language:
++ Python 3.10+
+Hosting:
++ Streamlit Cloud
+## 🌍 Try It Live
+ Public Link: https://spotifyvisuals.streamlit.app
 
 Paste any public Spotify playlist URL and watch it come to life.
 No account connection, no authentication, completely free to use.
