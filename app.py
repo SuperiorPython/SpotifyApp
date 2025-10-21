@@ -177,42 +177,79 @@ def build_rule_based_summary(stats):
         f"Frequent artists include {artist_line}. It {era_line}. Expect a consistent vibe with a few left-field moments."
     )
 
-def llm_vibe_summary(stats, vibe_hint=None):
+# --- Model picker (cached) ---
+@st.cache_resource
+def pick_openai_model():
+    # Allow manual override via env var / secret
+    override = st.secrets.get("OPENAI_MODEL") or os.getenv("OPENAI_MODEL")
+    if override:
+        return override
+
     api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key:
-        return None  # no LLM; caller will fall back
+        return None
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        ids = {m.id for m in client.models.list().data}
+        # preference order
+        for m in ["gpt-4", "gpt-4-0613", "gpt-3.5-turbo"]:
+            if m in ids:
+                return m
+    except Exception:
+        pass
+    return None  # unknown; llm function will still try a safe default
+
+
+def llm_vibe_summary_detailed(stats, vibe_hint=None):
+    """Detailed vibe summary with automatic model selection and safe fallback."""
+    api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None, None  # (text, model)
+
+    model = pick_openai_model() or "gpt-4"
+
     try:
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
 
-        genres_str = ", ".join([f"{g} {p}%" for g, p in stats["top_genres"][:6]]) or "n/a"
-        artists_str = ", ".join([a for a, _ in stats["top_artists"][:10]]) or "n/a"
-        decades_str = ", ".join([f"{k}s:{v}" for k, v in stats["decades"].items()]) or "n/a"
-        median_pop = int(stats["median_pop"])
+        genres_str   = ", ".join([f"{g} {p}%" for g, p in stats["top_genres"][:8]]) or "n/a"
+        artists_str  = ", ".join([a for a, _ in stats["top_artists"][:12]]) or "n/a"
+        decades_str  = ", ".join([f"{k}s:{v}" for k, v in stats["decades"].items()]) or "n/a"
+        median_pop   = int(stats["median_pop"])
 
         system = (
-            "You are a warm, vivid music curator. Write a compact vibe description (90–130 words). "
-            "Focus on mood, energy, and scenes where this playlist fits. Avoid generic filler."
+            "You are a thoughtful music curator. Write vivid, specific, non-generic descriptions. "
+            "Avoid long lists of names; focus on how the playlist *feels* and where it fits."
         )
         user = (
-            f"Summarize the vibe of a Spotify playlist.\n\n"
-            f"Top genres: {genres_str}\n"
-            f"Frequent artists: {artists_str}\n"
-            f"Decades spread: {decades_str}\n"
-            f"Median popularity: {median_pop}\n"
-            f"Style hint (optional): {vibe_hint or 'none'}\n"
-            f"Please be specific, lively, and avoid listing too many names; emphasize feeling."
+            "Create a detailed vibe summary for a Spotify playlist based on the stats below.\n\n"
+            f"- Top genres: {genres_str}\n"
+            f"- Frequent artists: {artists_str}\n"
+            f"- Decade spread: {decades_str}\n"
+            f"- Median popularity (0-100): {median_pop}\n"
+            f"- Style hint (optional): {vibe_hint or 'none'}\n\n"
+            "Output in ~140–200 words. Include:\n"
+            "1) Core mood & energy (what it feels like and why)\n"
+            "2) Where/when it fits (e.g., study, night drive, gym, pregame)\n"
+            "3) Notable sonic traits (rhythm, production, vocals, tempo)\n"
+            "4) One line on variety vs cohesion\n"
+            "No emoji. No numbered lists of artists. Keep it concise but evocative."
         )
+
         resp = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=model,
             messages=[{"role": "system", "content": system},
-                      {"role": "user", "content": user}],
+                      {"role": "user",   "content": user}],
             temperature=0.75,
-            max_tokens=220,
+            max_tokens=300,
         )
-        return resp.choices[0].message.content.strip()
+        text = resp.choices[0].message.content.strip()
+        return text, model
     except Exception:
-        return None
+        return None, model
+
 
 # ----------------- Controls -----------------
 c1, c2 = st.columns([3,1])
@@ -496,22 +533,54 @@ with tab_cov:
         else:
             st.info("No cover art found for this playlist.")
 
-# ---- Companion (AI) tab ----
+# ---- Companion (AI) tab — one-button vibe ----
+# ---- Companion (AI) tab — one button, detailed vibe ----
 with tab_ai:
     if need_analysis():
         st.info("Analyze a playlist to view the AI companion.")
     else:
         tracks_df = st.session_state["tracks_df"]
-        enriched = st.session_state["enriched"]
+        enriched   = st.session_state["enriched"]
 
         st.subheader("Playlist Companion (AI)")
-        vibe_hint = st.text_input(
-            "Optional: nudge the description (e.g., 'moody late-night drive', 'high-energy gym mix')", ""
+
+        has_key = bool(st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY"))
+        model_note = pick_openai_model() if has_key else None
+        st.markdown(
+            f"✨ **AI mode** — {model_note or 'auto'}"
+            if has_key else
+            "⚙️ **Local mode (free)** — AI key not configured"
         )
-        stats = compute_stats(tracks_df, enriched)
-        text = llm_vibe_summary(stats, vibe_hint=vibe_hint) or build_rule_based_summary(stats)
-        st.write(text)
-        st.caption("If no OpenAI key is configured, a smart rule-based summary is used.")
+
+
+        # Output placeholder (keeps text visible after click or tab switch)
+        out = st.empty()
+
+        # Generate button
+        if st.button("Generate detailed vibe", type="primary", use_container_width=True):
+            stats = compute_stats(tracks_df, enriched)
+
+            with st.spinner("Crafting your playlist vibe…"):
+                text, used_model = (None, None)
+                if has_key:
+                    text, used_model = llm_vibe_summary_detailed(stats, vibe_hint=hint)
+
+                if not text:  # fallback if no key or any AI error
+                    text = build_rule_based_summary(stats)
+                    used_model = used_model or "local-fallback"
+
+            st.session_state["vibe_text"] = text
+            st.session_state["vibe_model"] = used_model
+            out.write(text)
+            st.caption(f"Source: {used_model}")
+
+        # Show previous result (if already generated this session)
+        elif st.session_state.get("vibe_text"):
+            out.write(st.session_state["vibe_text"])
+            if st.session_state.get("vibe_model"):
+                st.caption(f"Source: {st.session_state['vibe_model']}")
+
+
 
 # ---- Export tab ----
 with tab_export:
