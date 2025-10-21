@@ -55,3 +55,6 @@ Download results as CSVs or just enjoy the dashboard view.
 
 ## 📈 Example Vibe Output
 2010s Throwbacks: “A lively throwback to the early 2010s — full of catchy choruses, upbeat dance hits, and polished pop-R&B production. This playlist captures the carefree energy of weekend parties, school dances, and long drives with friends. Expect nostalgic hooks, polished beats, and that unmistakable 2010s shine that defined an entire era of radio and club anthems.”
+
+## Upcoming Features
+Better visuals, upgrading from a basic Streamlit presentation to actual frontend code
