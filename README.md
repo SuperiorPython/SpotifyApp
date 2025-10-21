@@ -26,6 +26,7 @@ No login required — just paste a playlist link and explore.
 Frontend:
 + Streamlit
 + Altair  (interactive charts)
+
 Backend:
 + Spotipy (using the Spotify Web API (Client Credentials Flow))
 + OpenAI API (optional vibe descriptions)
