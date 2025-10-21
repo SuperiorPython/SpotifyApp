@@ -32,6 +32,7 @@ Backend:
 + OpenAI API (optional vibe descriptions)
 Language:
 + Python 3.10+
+
 Hosting:
 + Streamlit Cloud
 ## 🌍 Try It Live
