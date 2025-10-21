@@ -8,8 +8,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.exceptions import SpotifyException
 
 # ----------------- App setup -----------------
-st.set_page_config(page_title="Playlist Visual Footprint", page_icon="🟢", layout="wide")
-st.title("🟢 Playlist Visual Footprint")
+st.set_page_config(page_title="Playlist DNA", page_icon="🟢", layout="wide")
+st.title("🟢 Playlist DNA")
 st.caption("Analyze any **public** Spotify playlist. Green visuals • Stable tabs • Optional AI vibe summary.")
 
 with st.sidebar:
