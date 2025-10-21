@@ -52,7 +52,5 @@ Optionally, the AI Companion (powered by OpenAI GPT models) generates a personal
 
 Download results as CSVs or just enjoy the dashboard view.
 
-## 📈 Example Output
-Demo Playlist	Example Vibe Summary
-Today's Top Hits
-	“This playlist radiates bright, upbeat pop energy with glossy production, rhythmic hooks, and confident vocals. Perfect for busy mornings, gym sessions, or long drives under the sun.”
+## 📈 Example Vibe Output
+2010s Throwbacks: “A lively throwback to the early 2010s — full of catchy choruses, upbeat dance hits, and polished pop-R&B production. This playlist captures the carefree energy of weekend parties, school dances, and long drives with friends. Expect nostalgic hooks, polished beats, and that unmistakable 2010s shine that defined an entire era of radio and club anthems.”
