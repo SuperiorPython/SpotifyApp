@@ -529,18 +529,17 @@ with tab_cov:
             cols = st.columns(n_cols)
             for i, row in thumbs.iterrows():
                 with cols[i % n_cols]:
-                    st.image(row["image"], use_column_width=True)
+                    st.image(row["image"], use_container_width=True)
         else:
             st.info("No cover art found for this playlist.")
 
-# ---- Companion (AI) tab — one-button vibe ----
 # ---- Companion (AI) tab — one button, detailed vibe ----
 with tab_ai:
     if need_analysis():
         st.info("Analyze a playlist to view the AI companion.")
     else:
         tracks_df = st.session_state["tracks_df"]
-        enriched   = st.session_state["enriched"]
+        enriched  = st.session_state["enriched"]
 
         st.subheader("Playlist Companion (AI)")
 
@@ -552,33 +551,35 @@ with tab_ai:
             "⚙️ **Local mode (free)** — AI key not configured"
         )
 
-
-        # Output placeholder (keeps text visible after click or tab switch)
+        # Placeholder for output
         out = st.empty()
 
-        # Generate button
+        # One-click generate button
         if st.button("Generate detailed vibe", type="primary", use_container_width=True):
             stats = compute_stats(tracks_df, enriched)
 
             with st.spinner("Crafting your playlist vibe…"):
                 text, used_model = (None, None)
                 if has_key:
-                    text, used_model = llm_vibe_summary_detailed(stats, vibe_hint=hint)
+                    text, used_model = llm_vibe_summary_detailed(stats)
 
-                if not text:  # fallback if no key or any AI error
+                # Fallback if no key or any AI error
+                if not text:
                     text = build_rule_based_summary(stats)
                     used_model = used_model or "local-fallback"
 
+            # Store & display result
             st.session_state["vibe_text"] = text
             st.session_state["vibe_model"] = used_model
             out.write(text)
             st.caption(f"Source: {used_model}")
 
-        # Show previous result (if already generated this session)
+        # Show previously generated result if user navigates away/back
         elif st.session_state.get("vibe_text"):
             out.write(st.session_state["vibe_text"])
             if st.session_state.get("vibe_model"):
                 st.caption(f"Source: {st.session_state['vibe_model']}")
+
 
 
 
