@@ -1,4 +1,4 @@
-## 🟢 Playlist Visual Footprint
+## 🟢 Playlist DNA
 
 Discover what your playlists say about your music taste — visually.
 
