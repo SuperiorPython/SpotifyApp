@@ -142,47 +142,37 @@ def compute_evolution_stats(tracks_df: pd.DataFrame, enriched: pd.DataFrame) -> 
 
 # ----------------------- Rule-based fallback ---------------------- #
 
-def build_rule_based_summary(stats: Dict[str, Any], evolution: Optional[Dict[str, Any]] = None) -> str:
-    """
-    Human-readable summary without calling an LLM.
-    """
-    g = stats["top_genres"]
-    a = stats["top_artists"]
-    d = stats["decades"]
-    pop = stats["median_pop"]
-
+def build_rule_based_summary(stats, evolution=None, playlist_title: str | None = None):
+    g = stats["top_genres"]; a = stats["top_artists"]; d = stats["decades"]; pop = stats["median_pop"]
     genre_line = ", ".join([f"{name} ({pct}%)" for name, pct in g[:3]]) if g else "a mix of styles"
     artist_line = ", ".join([name for name, _ in a[:3]]) if a else "various artists"
-
     if d:
-        keys = list(d.keys())
-        first, last = keys[0], keys[-1]
-        tilt = max(d, key=d.get)
+        keys = list(d.keys()); first, last = keys[0], keys[-1]; tilt = max(d, key=d.get)
         era_line = f"spans {first}s–{last}s with a {tilt}s tilt"
     else:
         era_line = "spans multiple eras"
-
     mainstream = ("underground" if pop < 40 else "balanced" if pop < 65 else "mainstream-leaning")
 
     evo_line = ""
     if evolution:
         pace = "steady" if evolution["adds_per_day"] >= 0.3 else "occasional"
-        if evolution["adds_per_day"] >= 1.0:
-            pace = "bursty"
+        if evolution["adds_per_day"] >= 1.0: pace = "bursty"
         novelty = ""
         if evolution.get("median_age_years") is not None:
-            novelty = (
-                "recent-leaning" if evolution["median_age_years"] <= 3
-                else "nostalgic" if evolution["median_age_years"] >= 12
-                else "mixed-era"
-            )
-        rise = (", rising: " + ", ".join(g for g, _ in evolution.get("rising_genres", [])[:2])) if evolution.get("rising_genres") else ""
-        fall = (", cooling: " + ", ".join(g for g, _ in evolution.get("falling_genres", [])[:2])) if evolution.get("falling_genres") else ""
+            novelty = "recent-leaning" if evolution["median_age_years"] <= 3 else "nostalgic" if evolution["median_age_years"] >= 12 else "mixed-era"
+        rise = (", rising: " + ", ".join(g for g,_ in evolution.get("rising_genres", [])[:2])) if evolution.get("rising_genres") else ""
+        fall = (", cooling: " + ", ".join(g for g,_ in evolution.get("falling_genres", [])[:2])) if evolution.get("falling_genres") else ""
         evo_line = f" Curation pace feels {pace}{(', ' + novelty) if novelty else ''}{rise}{fall}."
+
+    title_hint = ""
+    if playlist_title:
+        t = playlist_title.strip()
+        if len(t) >= 3 and t.lower() not in {"my playlist","playlist","mix"}:
+            title_hint = f" The title “{t}” hints at the intended vibe."
 
     return (
         f"This playlist feels {mainstream}. Dominant flavors: {genre_line}. "
-        f"Frequent artists include {artist_line}. It {era_line}.{evo_line}"
+        f"Frequent artists include {artist_line}. It {era_line}.{evo_line}{title_hint}"
     )
 
 
@@ -216,15 +206,7 @@ def pick_openai_model() -> Optional[str]:
 
 # ---------------------------- LLM summary ---------------------------- #
 
-def llm_vibe_summary_detailed(
-    stats: Dict[str, Any],
-    evolution: Optional[Dict[str, Any]] = None,
-    vibe_hint: Optional[str] = None
-) -> Tuple[Optional[str], Optional[str]]:
-    """
-    Calls OpenAI (if configured) to generate a detailed vibe summary.
-    Returns (text, model). If not available, returns (None, None or model_guess).
-    """
+def llm_vibe_summary_detailed(stats, evolution=None, vibe_hint=None, playlist_title: str | None = None):
     api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key:
         return None, None
@@ -234,12 +216,13 @@ def llm_vibe_summary_detailed(
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
 
-        genres_str = ", ".join([f"{g} {p}%" for g, p in stats["top_genres"][:8]]) or "n/a"
+        genres_str  = ", ".join([f"{g} {p}%" for g, p in stats["top_genres"][:8]]) or "n/a"
         artists_str = ", ".join([a for a, _ in stats["top_artists"][:12]]) or "n/a"
         decades_str = ", ".join([f"{k}s:{v}" for k, v in stats["decades"].items()]) or "n/a"
-        median_pop = int(stats["median_pop"])
+        median_pop  = int(stats["median_pop"])
+        title_str   = (playlist_title or "").strip() or "none"
 
-        evo_lines: List[str] = []
+        evo_lines = []
         if evolution:
             evo_lines.append(f"- Observed window: {evolution['first_date']} → {evolution['last_date']} ({evolution['days_span']} days)")
             evo_lines.append(f"- Avg adds/day: {evolution['adds_per_day']}")
@@ -247,51 +230,44 @@ def llm_vibe_summary_detailed(
                 burst_fmt = "; ".join([f"{d} (+{n})" for d, n in evolution["bursts_top"]])
                 evo_lines.append(f"- Burst days: {burst_fmt}")
             if evolution.get("median_age_years") is not None:
-                evo_lines.append(f"- Median track age at add: {round(evolution['median_age_years'], 1)} years")
-                if evolution.get("rising_genres"):
-                    evo_lines.append(
-                        "- Rising genres: "
-                        + ", ".join([f"{g} (+{abs(s):.0%})" for g, s in evolution["rising_genres"]])
-                    )
-                if evolution.get("falling_genres"):
-                    evo_lines.append(
-                        "- Declining genres: "
-                        + ", ".join([f"{g} ({-abs(s):.0%})" for g, s in evolution["falling_genres"]])
-                    )
-            evo_block = "\n".join(evo_lines) if evo_lines else "none"
+                evo_lines.append(f"- Median track age at add: {round(evolution['median_age_years'],1)} years")
+            if evolution.get("rising_genres"):
+                evo_lines.append("- Rising genres: " + ", ".join([f"{g} (+{abs(s):.0%})" for g, s in evolution["rising_genres"]]))
+            if evolution.get("falling_genres"):
+                evo_lines.append("- Declining genres: " + ", ".join([f"{g} ({-abs(s):.0%})" for g, s in evolution["falling_genres"]]))
+        evo_block = "\n".join(evo_lines) if evo_lines else "none"
 
-            system = (
-                "You are a thoughtful music curator. Write vivid, specific descriptions. "
-                "Weave in how the playlist changed over time if evolution info is provided."
-            )
-            user = (
-                "Create a detailed vibe summary for a Spotify playlist using these stats.\n\n"
-                f"CURRENT SNAPSHOT\n"
-                f"- Top genres: {genres_str}\n"
-                f"- Frequent artists: {artists_str}\n"
-                f"- Decade distribution: {decades_str}\n"
-                f"- Median popularity (0-100): {median_pop}\n"
-                f"- Style hint (optional): {vibe_hint or 'none'}\n\n"
-                f"EVOLUTION SNAPSHOT (if any)\n{evo_block}\n\n"
-                "Write ~160–220 words. Include:\n"
-                "1) Core mood & energy (what it feels like and why)\n"
-                "2) Where/when it fits (study, commute, night drive, etc.)\n"
-                "3) Sonic traits (rhythm/production/vocals/tempo)\n"
-                "4) How the playlist evolved (pace of additions, rising/declining genres, novelty vs. nostalgia)\n"
-                "Avoid long artist lists. No emojis."
-            )
+        system = (
+            "You are a thoughtful music curator. Write vivid, specific descriptions. "
+            "Use the playlist title only as a weak hint of intent—do not let a cheeky title override the data."
+        )
+        user = (
+            "Create a detailed vibe summary for a Spotify playlist using these stats.\n\n"
+            f"PLAYLIST TITLE: {title_str}\n"
+            f"CURRENT SNAPSHOT\n"
+            f"- Top genres: {genres_str}\n"
+            f"- Frequent artists: {artists_str}\n"
+            f"- Decade distribution: {decades_str}\n"
+            f"- Median popularity (0-100): {median_pop}\n"
+            f"- Style hint (optional): {vibe_hint or 'none'}\n\n"
+            f"EVOLUTION SNAPSHOT (if any)\n{evo_block}\n\n"
+            "Write ~160–220 words. Include:\n"
+            "1) Core mood & energy (what it feels like and why)\n"
+            "2) Where/when it fits (study, commute, night drive, etc.)\n"
+            "3) Sonic traits (rhythm/production/vocals/tempo)\n"
+            "4) How the playlist evolved (pace of additions, rising/declining genres, novelty vs. nostalgia)\n"
+            "Avoid long artist lists. No emojis."
+        )
 
-            resp = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-                temperature=0.7,
-                max_tokens=350,
-            )
-            text = resp.choices[0].message.content.strip()
-            return text, model
+        resp = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "system", "content": system},
+                      {"role": "user",   "content": user}],
+            temperature=0.7,
+            max_tokens=350,
+        )
+        text = resp.choices[0].message.content.strip()
+        return text, model
     except Exception:
         return None, model
 
