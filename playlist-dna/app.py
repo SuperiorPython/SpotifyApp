@@ -32,7 +32,7 @@ def need_analysis():
 
 
 if need_analysis() and not st.session_state.get("trigger_analyze"):                     # 👈 hide sidebar on cover only
-    render_cover("assets/cover_image.png", size_px=450)
+    render_cover("playlist-dna/assets/cover_image.png", size_px=450)
     st.stop()
 # --- Spotify client ---
 sp = build_spotify_client()
