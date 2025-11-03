@@ -15,7 +15,6 @@ st.set_page_config(
 
 APP_DIR = Path(__file__).resolve().parent
 COVER_PATH = APP_DIR / "assets" / "cover_image.png"
-st.image(str(COVER_PATH))
 
 # --- Theme palette (shared) ---
 PALETTE = ["#1b5e20","#2e7d32","#388e3c","#43a047","#4caf50",
