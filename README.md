@@ -11,6 +11,8 @@ No login required — just paste a playlist link and explore.
 
 👤 Artist Breakdown → Lollipop chart showing your most frequent artists
 
+🔍 Playlist → Visualizes when songs were added and how styles shifted over time
+
 📅 Timeline View → Decade-by-decade and artist-by-year visualizations
 
 ⭐ Popularity Explorer → See how mainstream or niche your playlist really is
@@ -36,7 +38,7 @@ Language:
 Hosting:
 + Streamlit Cloud
 ## 🌍 Try It Live
- Public Link: https://spotifyvisuals.streamlit.app
+ Public Link: https://playlistdna.streamlit.app/
 
 Paste any public Spotify playlist URL and watch it come to life.
 No account connection, no authentication, completely free to use.
