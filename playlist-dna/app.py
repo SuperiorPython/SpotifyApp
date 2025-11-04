@@ -4,7 +4,6 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 import altair as alt
-from views.descriptions import render_description
 
 # --- App config ---
 st.set_page_config(
@@ -72,6 +71,8 @@ if st.session_state.get("trigger_analyze"):
             meta = get_playlist_meta(sp, pid, market=st.session_state.get("market","US"))
             owner = (meta.get("owner") or {}).get("display_name", "unknown")
             pname = meta.get("name", "(no name)")
+            pcover = ((meta.get("images") or [{}])[0].get("url"))  # may be None
+            plink = (meta.get("external_urls") or {}).get("spotify")
 
             status.update(label="Fetching tracks…")
             tracks_df, dropped = fetch_playlist_tracks(sp, pid, market=st.session_state.get("market","US"))
@@ -95,7 +96,14 @@ if st.session_state.get("trigger_analyze"):
 
             # persist
             st.session_state["last_pid"] = pid
-            st.session_state["meta"] = {"name": pname, "owner": owner, "dropped": dropped}
+            st.session_state["meta"] = {
+                "name": pname,
+                "owner": owner,
+                "dropped": dropped,
+                "cover": pcover,  # 👈 NEW
+                "url": plink,  # 👈 NEW
+            }
+
             st.session_state["tracks_df"] = tracks_df
             st.session_state["enriched"] = enriched
 
@@ -131,6 +139,71 @@ from views.popularity import render_popularity
 from views.covers import render_covers
 from views.companion import render_companion
 from views.export import render_export
+
+if not need_analysis():
+    meta  = st.session_state.get("meta", {})
+    name  = meta.get("name") or "(no name)"
+    owner = meta.get("owner") or "unknown"
+    cover = meta.get("cover")
+    url   = meta.get("url")
+
+    st.markdown(
+        """
+        <style>
+            .playlist-header {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 2rem;
+                padding: 1.8rem 0;
+                min-height: 210px;
+            }
+            .playlist-header img {
+                width: 300px;
+                height: 300px;
+                object-fit: cover;
+                border-radius: 10px;
+                box-shadow: 0 0 25px rgba(29,185,84,0.45);
+            }
+            .playlist-info h2 {
+                margin: 0;
+                font-size: 2rem;
+                font-weight: 700;
+            }
+            .playlist-info a {
+                color: #1DB954;
+                text-decoration: none;
+            }
+            .playlist-info a:hover {
+                text-decoration: underline;
+            }
+            .playlist-info p {
+                margin-top: 6px;
+                font-size: 1.1rem;
+                color: #ccc;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Render dynamic content
+    cover_html = (
+        f"<img src='{cover}' alt='playlist cover'>"
+        if cover else "<div style='width:300px;height:300px;background:#222;border-radius:10px;'></div>"
+    )
+
+    title_html = (
+        f"<div class='playlist-info'>"
+        f"<h2><a href='{url}' target='_blank'>{name}</a></h2>"
+        f"<p>by <b>{owner}</b></p>"
+        f"</div>"
+    )
+
+    st.markdown(f"<div class='playlist-header'>{cover_html}{title_html}</div>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin-top:1rem;margin-bottom:1rem;border-color:#333;'>", unsafe_allow_html=True)
+
+    #st.divider()
 
 TABS = ["Overview","Evolution","Genres","Artists","Time","Popularity","Covers","Companion (AI)","Export"]
 tab_over, tab_evo, tab_gen, tab_art, tab_time, tab_pop, tab_cov, tab_ai, tab_export = st.tabs(TABS)
