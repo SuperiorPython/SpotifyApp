@@ -4,6 +4,7 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 import altair as alt
+from views.descriptions import render_description
 
 # --- App config ---
 st.set_page_config(
@@ -13,8 +14,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"  # start with sidebar hidden
 )
 
-APP_DIR = Path(__file__).resolve().parent
-COVER_PATH = APP_DIR / "assets" / "cover_image.png"
+APP_DIR = Path(__file__).parent
+COVER_IMAGE_PATH = APP_DIR / "assets" / "cover_dna.png"
 
 # --- Theme palette (shared) ---
 PALETTE = ["#1b5e20","#2e7d32","#388e3c","#43a047","#4caf50",
@@ -32,13 +33,10 @@ def need_analysis():
 
 
 if need_analysis() and not st.session_state.get("trigger_analyze"):                     # 👈 hide sidebar on cover only
-    render_cover("playlist-dna/assets/cover_image.png", size_px=450)
+    render_cover("assets/cover_image.png", size_px=450)
     st.stop()
 # --- Spotify client ---
 sp = build_spotify_client()
-
-#def need_analysis():
-    #return ("tracks_df" not in st.session_state) or ("enriched" not in st.session_state)
 
 # --- Sidebar (only after analysis) ---
 with st.sidebar:
@@ -55,11 +53,10 @@ with st.sidebar:
             for k in list(st.session_state.keys()):
                 del st.session_state[k]
             st.rerun()
-
-# --- Cover gate ---
-#if need_analysis() and not st.session_state.get("trigger_analyze"):
-#    render_cover("assets/cover_image.png")  # sets trigger + url and reruns
-#    st.stop()
+        st.divider()
+        if st.button("ℹ️ Description", use_container_width=True):
+            st.session_state["show_description"] = True
+            st.rerun()
 
 # --- Analyze trigger (runs after cover or sidebar request) ---
 if st.session_state.get("trigger_analyze"):
@@ -112,6 +109,17 @@ if st.session_state.get("trigger_analyze"):
         except Exception as e:
             st.error(f"Error: {e}")
             st.stop()
+
+if st.session_state.get("show_description"):
+    from views.descriptions import render_description
+    render_description()
+
+    # Optional: add a Back button to return to the app
+    if st.button("⬅️ Back to App", use_container_width=True):
+        del st.session_state["show_description"]
+        st.rerun()
+
+    st.stop()
 
 # --- Views (tabs) ---
 from views.overview import render_overview
