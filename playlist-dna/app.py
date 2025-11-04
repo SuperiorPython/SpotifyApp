@@ -162,8 +162,8 @@ if not need_analysis():
                 width: 300px;
                 height: 300px;
                 object-fit: cover;
-                border-radius: 10px;
-                box-shadow: 0 0 25px rgba(29,185,84,0.45);
+                border-radius: 20px;
+                box-shadow: 0 0 100px rgba(29,185,84,0.45);
             }
             .playlist-info h2 {
                 margin: 0;
@@ -178,7 +178,7 @@ if not need_analysis():
                 text-decoration: underline;
             }
             .playlist-info p {
-                margin-top: 6px;
+                margin-top: 20px;
                 font-size: 1.1rem;
                 color: #ccc;
             }
@@ -190,7 +190,7 @@ if not need_analysis():
     # Render dynamic content
     cover_html = (
         f"<img src='{cover}' alt='playlist cover'>"
-        if cover else "<div style='width:300px;height:300px;background:#222;border-radius:10px;'></div>"
+        if cover else "<div style='width:300px;height:300px;background:#222;border-radius:50px;'></div>"
     )
 
     title_html = (
