@@ -242,21 +242,25 @@ def llm_vibe_summary_detailed(stats, evolution=None, vibe_hint=None, playlist_ti
             "Use the playlist title only as a weak hint of intent—do not let a cheeky title override the data."
         )
         user = (
-            "Create a detailed vibe summary for a Spotify playlist using these stats.\n\n"
+            "You are a passionate music fan who loves uncovering what makes playlists special.\n"
+            "Write a thoughtful, human summary that captures the feeling and flow of the playlist based on the data below.\n\n"
             f"PLAYLIST TITLE: {title_str}\n"
             f"CURRENT SNAPSHOT\n"
             f"- Top genres: {genres_str}\n"
             f"- Frequent artists: {artists_str}\n"
             f"- Decade distribution: {decades_str}\n"
-            f"- Median popularity (0-100): {median_pop}\n"
+            f"- Median popularity (0–100): {median_pop}\n"
             f"- Style hint (optional): {vibe_hint or 'none'}\n\n"
             f"EVOLUTION SNAPSHOT (if any)\n{evo_block}\n\n"
-            "Write ~250-300 words. Include:\n"
-            "1) Core mood & energy (what it feels like and why)\n"
-            "2) Where/when it fits (examples include study, commute, night drive, gym, etc.)\n"
-            "3) Sonic traits (rhythm/production/vocals/tempo)\n"
-            "4) How the playlist evolved (pace of additions, rising/declining genres, novelty vs. nostalgia)\n"
-            "Avoid long artist lists. No emojis."
+            "Write a 250–300 word description that feels insightful and human — not robotic or list-based. "
+            "Balance analytical tone with emotional depth.\n\n"
+            "Include:\n"
+            "1) The playlist’s *core mood and emotional landscape* — what kind of atmosphere it creates and who it speaks to.\n"
+            "2) *Contextual use cases* — where or when it fits best (e.g., study sessions, rainy nights, focus work, road trips).\n"
+            "3) *Sonic identity* — describe the textures, pacing, and vocal or instrumental traits that define its sound.\n"
+            "4) *Evolution story* — how it has grown or shifted over time (additions, rising/declining genres, nostalgia vs. discovery).\n\n"
+            "End with one sentence that summarizes its overall personality in a human-like or memorable way.\n"
+            "Avoid bullet points, emojis, or artist lists; make it flow like a magazine feature."
         )
 
         resp = client.chat.completions.create(
