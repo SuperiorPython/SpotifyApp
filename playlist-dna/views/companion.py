@@ -1,15 +1,12 @@
 # views/companion.py
 import os
+from pathlib import Path
 import streamlit as st
-from src.core.stats import (
-    compute_stats,
-    compute_evolution_stats,
-    pick_openai_model,
-    llm_vibe_summary_detailed,
-    build_rule_based_summary,
-)
+from src.core.stats import compute_stats, compute_evolution_stats, pick_openai_model, llm_vibe_summary_detailed, build_rule_based_summary
 from src.ui.typing import typewriter
 
+APP_DIR = Path(__file__).resolve().parents[1]
+ROBOT_PATH = APP_DIR / "assets" / "robot_image.png"   # <-- place your image here
 
 def render_companion(PALETTE, PRIMARY, SECONDARY, FILL):
     if "tracks_df" not in st.session_state or "enriched" not in st.session_state:
@@ -17,51 +14,87 @@ def render_companion(PALETTE, PRIMARY, SECONDARY, FILL):
         return
 
     tracks_df = st.session_state["tracks_df"]
-    enriched = st.session_state["enriched"]
+    enriched  = st.session_state["enriched"]
 
     st.subheader("Playlist Companion (AI)")
+
     has_key = bool(st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY"))
     model_note = pick_openai_model() if has_key else None
     st.markdown(
         f"✨ **AI mode** — {model_note or 'auto'}"
-        if has_key
-        else "⚙️ **Local mode (free)** — AI key not configured"
+        if has_key else
+        "⚙️ **Local mode (free)** — AI key not configured"
     )
 
-    # Output container for animated text
-    out = st.empty()
+    # --- Layout: text left, robot right
+    text_col, robot_col = st.columns([3, 1], vertical_alignment="top")
 
-    # Button layout
-    colA, colB = st.columns([1, 1])
-    with colA:
-        do_generate = st.button("Generate detailed vibe", type="primary", use_container_width=True)
-    with colB:
-        do_regen = st.button("Regenerate", type="primary", use_container_width=True)
+    # Robot styles (glow + gentle float). Mirror X if your PNG faces right.
+    with robot_col:
+        st.markdown(
+            """
+            <style>
+              .robot-wrap img{
+                width:100%;
+                filter: drop-shadow(0 0 22px rgba(67,160,71,0.9));
+                /* flip horizontally if your source faces right; comment out if already facing left */
+                transform: scaleX(-1);
+              }
+              @keyframes floaty {
+                0%   { transform: translateY(0)    scaleX(-1); }
+                50%  { transform: translateY(-6px) scaleX(-1); }
+                100% { transform: translateY(0)    scaleX(-1); }
+              }
+              .floaty { animation: floaty 3s ease-in-out infinite; }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # Generate logic
-    if do_generate or do_regen:
+    # Placeholder for typed summary on the left
+    out = text_col.empty()
+
+    # Robot displayed whenever we’re generating or showing output
+    def show_robot():
+        if ROBOT_PATH.exists():
+            with robot_col:
+                st.markdown("<div class='robot-wrap floaty'>", unsafe_allow_html=True)
+                st.image(str(ROBOT_PATH), use_container_width=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+
+    # Controls
+    c1, c2 = text_col.columns([1,1])
+    gen = c1.button("Generate detailed vibe", type="primary", use_container_width=True)
+    regen = c2.button("Regenerate", type = "primary", use_container_width=True, key="regen_btn",
+                      help="Try a fresh take")
+
+    # Generate/Regenerate behavior
+    if gen or regen:
         stats = compute_stats(tracks_df, enriched)
         evolution = compute_evolution_stats(tracks_df, enriched)
+        title = st.session_state.get("meta", {}).get("name")
+
+        # Show robot immediately as we start typing
+        show_robot()
 
         with st.spinner("Crafting your playlist vibe…"):
             text, used_model = (None, None)
             if has_key:
-                text, used_model = llm_vibe_summary_detailed(stats, evolution=evolution)
+                text, used_model = llm_vibe_summary_detailed(stats, evolution=evolution, playlist_title=title)
             if not text:
-                text = build_rule_based_summary(stats, evolution=evolution)
+                text = build_rule_based_summary(stats, evolution=evolution, playlist_title=title)
                 used_model = used_model or "local-fallback"
 
-        # Store + flag for animation
+        # Save + animate
         st.session_state["vibe_text"] = text
         st.session_state["vibe_model"] = used_model
-        st.session_state["vibe_should_animate"] = True
+        # slower typing + green caret already handled in typewriter module
+        typewriter(out, text, chunk=3, delay=0.04, caret_color="#43a047")
+        text_col.caption(f"Source: {used_model}")
 
-    # Display (animate only on new generation)
-    if st.session_state.get("vibe_text"):
-        if st.session_state.pop("vibe_should_animate", False):
-            typewriter(out, st.session_state["vibe_text"], chunk=1, delay=0.05)  # ⏳ slower, smoother
-        else:
-            out.markdown(st.session_state["vibe_text"], unsafe_allow_html=True)
-
+    elif st.session_state.get("vibe_text"):
+        # If we already have a summary, show robot + pinned text
+        show_robot()
+        out.markdown(st.session_state["vibe_text"])
         if st.session_state.get("vibe_model"):
-            st.caption(f"Source: {st.session_state['vibe_model']}")
+            text_col.caption(f"Source: {st.session_state['vibe_model']}")
