@@ -19,7 +19,7 @@ def render_covers(PALETTE, PRIMARY, SECONDARY, FILL):
 
     # Controls (optional)
     total_available = len(thumbs_all)
-    max_show = min(96, total_available)  # safety cap
+    max_show = min(100, total_available)  # safety cap
     count = st.slider("How many covers to show", 12, max_show, min(24, max_show), step=6)
     n_cols = st.slider("Columns", 3, 10, 6, step=1)
 
@@ -31,3 +31,4 @@ def render_covers(PALETTE, PRIMARY, SECONDARY, FILL):
     for i, row in thumbs.iterrows():
         with cols[i % n_cols]:
             st.image(row["image"], use_container_width=True)
+
