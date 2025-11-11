@@ -229,8 +229,8 @@ def render_search(PALETTE, PRIMARY, SECONDARY, FILL):
         else:
             st.caption("No genres available for this track.")
 
-    st.markdown("### Raw Details")
 
+    st.markdown("### Raw Data")
     # Raw details table (optional)
     with st.expander("Raw track details"):
         show_cols = ["name", "artist", "album", "release_year", "popularity", "added_at", "id", "url"]
