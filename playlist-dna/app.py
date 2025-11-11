@@ -5,6 +5,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
+
 # --- App config ---
 st.set_page_config(
     page_title="Playlist DNA",
@@ -29,7 +30,6 @@ from src.core.stats import compute_stats, compute_evolution_stats, pick_openai_m
 
 def need_analysis():
     return ("tracks_df" not in st.session_state) or ("enriched" not in st.session_state)
-
 
 if need_analysis() and not st.session_state.get("trigger_analyze"):                     # 👈 hide sidebar on cover only
     render_cover("playlist-dna/assets/cover_image.png", size_px=450)
@@ -137,6 +137,7 @@ from views.artists import render_artists
 from views.time import render_time
 from views.popularity import render_popularity
 from views.covers import render_covers
+from views.search import render_search
 from views.companion import render_companion
 from views.export import render_export
 
@@ -205,8 +206,8 @@ if not need_analysis():
 
     #st.divider()
 
-TABS = ["Overview","Evolution","Genres","Artists","Time","Popularity","Covers","Companion (AI)","Export"]
-tab_over, tab_evo, tab_gen, tab_art, tab_time, tab_pop, tab_cov, tab_ai, tab_export = st.tabs(TABS)
+TABS = ["Overview","Evolution","Genres","Artists","Time","Popularity","Covers", "Search", "Companion (AI)","Export"]
+tab_over, tab_evo, tab_gen, tab_art, tab_time, tab_pop, tab_cov, tab_search, tab_ai, tab_export = st.tabs(TABS)
 
 with tab_over:     render_overview(PALETTE, PRIMARY, SECONDARY, FILL)
 with tab_evo:      render_evolution(PALETTE, PRIMARY, SECONDARY, FILL)
@@ -215,5 +216,6 @@ with tab_art:      render_artists(PALETTE, PRIMARY, SECONDARY, FILL)
 with tab_time:     render_time(PALETTE, PRIMARY, SECONDARY, FILL)
 with tab_pop:      render_popularity(PALETTE, PRIMARY, SECONDARY, FILL)
 with tab_cov:      render_covers(PALETTE, PRIMARY, SECONDARY, FILL)
+with tab_search:   render_search(PALETTE, PRIMARY, SECONDARY, FILL)
 with tab_ai:       render_companion(PALETTE, PRIMARY, SECONDARY, FILL)
 with tab_export:   render_export()
