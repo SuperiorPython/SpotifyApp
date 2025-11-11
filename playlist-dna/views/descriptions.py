@@ -1,5 +1,6 @@
 # src/views/description.py
 import os
+import datetime
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -9,80 +10,87 @@ def render_description():
 
     st.markdown(
         """
-Playlist DNA analyzes **any public Spotify playlist** and turns it into clear visuals and a short, human-readable vibe summary.
+Playlist DNA transforms **any public Spotify playlist** into interactive visuals and a narrative-style **vibe summary** that captures its sound, energy, and evolution.  
+It’s designed for music lovers, data explorers, and creators who want to *see the story behind their playlists*.
+"""
+    )
 
-### What you can do
-- **Overview** – key stats, a sample of tracks, and a genre donut  
-- **Evolution** – growth over time, genre share by month, and weekday×hour activity  
-- **Genres & Artists** – top genres and lead artists with interactive filters  
-- **Time** – decade distribution and artist×year heatmap  
-- **Popularity** – histogram and popularity vs. release year scatter  
-- **Covers** – tidy album-art grid  
-- **AI Companion** – ~160–220 word vibe summary (optional OpenAI key)  
-- **Export** – download playlist tracks and artist details as CSV
+    st.markdown("### What you can explore")
+    st.markdown(
+        """
+- **Overview** – key stats, track sample, and a genre donut  
+- **Evolution** – playlist growth, genre shifts, and weekday×hour activity  
+- **Genres & Artists** – explore top genres and lead artists interactively  
+- **Time** – decade breakdown and artist×year heatmap  
+- **Popularity** – histogram plus popularity vs. release year  
+- **Covers** – clean album-art grid  
+- **AI Companion** – 200–300 word *vibe essay* powered by OpenAI (optional)  
+- **Search** – find a specific song to view its **popularity, genre tags, and date added**  
+- **Export** – download playlist and artist data as CSV
 """
     )
 
     st.markdown("### How it works")
     st.markdown(
         """
-- Uses **Spotify Web API** via **client credentials** (no user login required).
-- Fetches playlist metadata, tracks, and artists; enriches artists with **genres** and popularity.
-- **Altair** and **Pandas** power the charts; **Streamlit** powers the UI.
-- If an **OpenAI key** is set, the AI summary blends genres, artist frequency, decade spread, popularity, and **evolution** stats.  
-  The **playlist title** is used as a *soft hint* (it won’t override the data).
-- If there’s no key or an API error, a **deterministic rule-based fallback** produces a concise summary.
+- Uses **Spotify’s Web API** through the **client credentials** method (no login required).  
+- Collects playlist metadata, track info, and artist genres with popularity scores.  
+- **Altair** and **Pandas** handle the analytics; **Streamlit** powers the visual experience.  
+- If you configure an **OpenAI key**, the AI Companion merges genre trends, artist frequencies, popularity, and evolution stats.  
+  The **playlist title** acts as a stylistic cue — it shapes tone but never overrides data.  
+- Without a key, a deterministic **rule-based summary** ensures consistent fallback text.
 """
     )
 
     st.markdown("### Privacy & data")
     st.markdown(
         """
-- Only works with **public playlists**. No access to private data.  
-- Data is fetched from Spotify’s public endpoints at view time; nothing is stored server-side.  
-- Track availability, images, and genres may vary by region.  
-- **Audio features** are not used due to access limitations in third-party contexts.
+- Only supports **public playlists** — no access to private Spotify data.  
+- Data is fetched live from Spotify’s public endpoints; nothing is stored on servers.  
+- Some tracks, genres, or images may differ by region.  
+- **Audio features** (like tempo or danceability) are excluded due to API limitations.
 """
     )
 
-    st.markdown("### Known limitations & bugs")
+    st.markdown("### Known limitations")
     st.markdown(
         """
-- **One-time “tab bounce”**: The first interaction with a button/slider **inside any tab** may reroute you to **Overview** once per session.  
-  *Workaround*: click back into your tab; it won’t recur for that session.
-- **Public playlists made by Spotify accounts only**: Personalized lists (e.g., Discover Weekly) aren’t available via client-credentials.
-- **Incomplete `added_at`**: Some playlists lack reliable “date added” data; **Evolution** visuals may be limited or absent.
-- **Genre coverage**: Genre labels come from artists; niche artists may not have strong tagging → “unknown” or sparse distributions.
-- **Region gating**: Tracks not available in your configured **Market** (e.g., US) are skipped → lower track counts.
-- **AI variability**: AI summaries are probabilistic; tone is guided but may vary slightly across runs.
+- **One-time tab bounce** – First click inside any tab may briefly reroute to *Overview* once per session.  
+  *(Workaround: click back into your tab — it won’t happen again.)*  
+- **Spotify-made playlists only** – Personalized lists (like *Discover Weekly*) can’t be fetched via client credentials.  
+- **Missing timestamps** – Some playlists lack `added_at` data; *Evolution* and *Search* visuals may show partial results.  
+- **Genre sparsity** – Some niche artists lack proper tagging, showing “unknown.”  
+- **Region gating** – Tracks unavailable in your selected **Market** are skipped.  
+- **AI variability** – AI summaries are slightly different across sessions by design.
 """
     )
 
     st.markdown("### Tips & troubleshooting")
     st.markdown(
         """
-- If charts look empty, try switching **Market** in Advanced (US/GB/DE/FR/CA/AU/BR/JP).  
-- Use **Genres → Clear filter** if your selection becomes too narrow.  
-- If the app gets into a weird state, use **sidebar → Clear cache & rerun**.
-- For best results, start with playlists that have **≥ 30 tracks** and a mix of artists.
+- Empty charts? Try another **Market** (US, GB, DE, FR, CA, AU, BR, JP).  
+- Overfiltered genres? Use **Clear filter** to reset.  
+- Misalignment? Use **Clear cache & rerun** from the sidebar.  
+- For better summaries, use playlists with **30+ diverse tracks**.
 """
     )
 
     st.markdown("### Roadmap")
     st.markdown(
         """
-- Playlist **evolution timelapse** and smoother first-interaction behavior  
-- Cross-playlist compare view  
-- Optional **user auth** (private playlists)  
-- More AI insights (tone, context snippets) with clear opt-in
+- Playlist **evolution timelapse** visualization  
+- Cross-playlist comparison  
+- Optional **Spotify login** for private lists  
+- Richer AI Companion insights (tone, emotional palette, trends)  
+- Improved *Search* tab with artist-link previews
 """
     )
 
     st.markdown("### Credits")
     st.markdown(
         """
-Built with **Streamlit**, **Altair**, **Pandas**, and **Spotipy** (Spotify Web API).  
-AI summaries via **OpenAI** (optional).  
+Built with **Streamlit**, **Altair**, **Pandas**, and **Spotipy**.  
+AI Companion powered by **OpenAI** (optional).  
 """
     )
 
@@ -91,3 +99,15 @@ AI summaries via **OpenAI** (optional).
         st.write("Altair:", alt.__version__)
         st.write("Pandas:", pd.__version__)
         st.write("OpenAI key configured:", bool(st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")))
+
+    # --- Footer ---
+    st.markdown("---")
+    st.markdown(
+        f"""
+        <div style='text-align:center; font-size:0.9em; color:gray;'>
+            <b>Playlist DNA</b> • v1.3 — Updated {datetime.date.today().strftime('%B %Y')}  
+            Built for discovery, powered by data 🎧
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
