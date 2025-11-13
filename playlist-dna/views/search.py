@@ -65,7 +65,7 @@ def render_search(PALETTE, PRIMARY, SECONDARY, FILL):
 
     # Build labels and take top N for suggestion list
     matches["label"] = matches.apply(lambda r: f"{r.get('name', '—')} — {r.get('artist', '—')}", axis=1)
-    suggestions = matches.head(25)[["label", "id"]].reset_index(drop=True)
+    suggestions = matches.head(10)[["label", "id"]].reset_index(drop=True)
 
     if suggestions.empty:
         st.warning("No matches. Try a different keyword.")
@@ -235,4 +235,5 @@ def render_search(PALETTE, PRIMARY, SECONDARY, FILL):
     with st.expander("Raw track details"):
         show_cols = ["name", "artist", "album", "release_year", "popularity", "added_at", "id", "url"]
         st.dataframe(tracks_df.loc[[row.name], [c for c in show_cols if c in tracks_df.columns]], use_container_width=True)
+
 
