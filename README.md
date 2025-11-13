@@ -32,8 +32,7 @@ Frontend:
 Backend:
 + Spotipy (using the Spotify Web API (Client Credentials Flow))
 + OpenAI API (optional vibe descriptions)
-Language:
-+ Python 3.10+
++ Language: Python 3.10+
 
 Hosting:
 + Streamlit Cloud
