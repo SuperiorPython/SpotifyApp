@@ -29,7 +29,7 @@ def render_companion(PALETTE, PRIMARY, SECONDARY, FILL):
     # --- Layout: text left, robot right
     text_col, robot_col = st.columns([3, 1], vertical_alignment="top")
 
-    # Robot styles (glow + gentle float). Mirror X if your PNG faces right.
+    # Robot styles (glow + gentle float). 
     with robot_col:
         st.markdown(
             """

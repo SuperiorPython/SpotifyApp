@@ -13,7 +13,7 @@ def build_spotify_client():
         st.error("Missing SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET in Streamlit Secrets (or env).")
         st.stop()
     auth = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
-    token = auth.get_access_token()  # force early failure if creds wrong
+    token = auth.get_access_token()  # force   early failure if creds wrong
     if not token:
         st.error("Could not obtain a client-credentials token. Check your Client ID/Secret.")
         st.stop()

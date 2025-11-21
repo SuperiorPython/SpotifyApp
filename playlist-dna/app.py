@@ -31,7 +31,7 @@ from src.core.stats import compute_stats, compute_evolution_stats, pick_openai_m
 def need_analysis():
     return ("tracks_df" not in st.session_state) or ("enriched" not in st.session_state)
 
-if need_analysis() and not st.session_state.get("trigger_analyze"):                     # 👈 hide sidebar on cover only
+if need_analysis() and not st.session_state.get("trigger_analyze"):
     render_cover("playlist-dna/assets/cover_image.png", size_px=450)
     st.stop()
 # --- Spotify client ---
@@ -100,8 +100,8 @@ if st.session_state.get("trigger_analyze"):
                 "name": pname,
                 "owner": owner,
                 "dropped": dropped,
-                "cover": pcover,  # 👈 NEW
-                "url": plink,  # 👈 NEW
+                "cover": pcover,
+                "url": plink,
             }
 
             st.session_state["tracks_df"] = tracks_df
@@ -140,6 +140,7 @@ from views.covers import render_covers
 from views.search import render_search
 from views.companion import render_companion
 from views.export import render_export
+from views.chat import render_chat
 
 if not need_analysis():
     meta  = st.session_state.get("meta", {})
@@ -206,7 +207,7 @@ if not need_analysis():
 
     #st.divider()
 
-TABS = ["Overview","Evolution","Genres","Artists","Time","Popularity","Covers", "Search", "Companion (AI)","Export"]
+TABS = ["Overview","Evolution","Genres","Artists","Time","Popularity","Covers", "Search", "Companion (AI)", "Export"]
 tab_over, tab_evo, tab_gen, tab_art, tab_time, tab_pop, tab_cov, tab_search, tab_ai, tab_export = st.tabs(TABS)
 
 with tab_over:     render_overview(PALETTE, PRIMARY, SECONDARY, FILL)

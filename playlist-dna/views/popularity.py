@@ -3,7 +3,6 @@ import pandas as pd
 import altair as alt
 import streamlit as st
 
-# Fallback theme colors (replace with your shared constants if you have them)
 PRIMARY   = "#43a047"
 SECONDARY = "#2e7d32"
 

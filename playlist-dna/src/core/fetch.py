@@ -2,7 +2,7 @@
 import re
 import time
 import pandas as pd
-import streamlit as st   # ✅ this line fixes the NameError
+import streamlit as st
 from src.core.auth import spotify_call, build_spotify_client
 
 

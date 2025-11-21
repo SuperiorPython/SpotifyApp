@@ -4,7 +4,7 @@ import streamlit as st
 
 def typewriter(container, text: str, chunk: int = 3, delay: float = 0.03, caret_color="#43a047"):
     """
-    Animate text typing with a continuously blinking caret (▌).
+    Animate text typing with a continuously blinking caret
     """
     if not text:
         return

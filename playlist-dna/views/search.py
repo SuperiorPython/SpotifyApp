@@ -235,5 +235,3 @@ def render_search(PALETTE, PRIMARY, SECONDARY, FILL):
     with st.expander("Raw track details"):
         show_cols = ["name", "artist", "album", "release_year", "popularity", "added_at", "id", "url"]
         st.dataframe(tracks_df.loc[[row.name], [c for c in show_cols if c in tracks_df.columns]], use_container_width=True)
-
-

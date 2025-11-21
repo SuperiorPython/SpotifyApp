@@ -31,4 +31,3 @@ def render_covers(PALETTE, PRIMARY, SECONDARY, FILL):
     for i, row in thumbs.iterrows():
         with cols[i % n_cols]:
             st.image(row["image"], use_container_width=True)
-

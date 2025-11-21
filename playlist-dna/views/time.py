@@ -3,7 +3,6 @@ import pandas as pd
 import altair as alt
 import streamlit as st
 
-# Fallback colors; swap for your centralized theme if you have one
 PALETTE  = ["#1b5e20","#2e7d32","#388e3c","#43a047","#4caf50","#66bb6a","#81c784","#a5d6a7","#c8e6c9"]
 FILL     = "#66bb6a"
 
