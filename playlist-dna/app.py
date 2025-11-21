@@ -140,7 +140,7 @@ from views.covers import render_covers
 from views.search import render_search
 from views.companion import render_companion
 from views.export import render_export
-from views.chat import render_chat
+
 
 if not need_analysis():
     meta  = st.session_state.get("meta", {})
